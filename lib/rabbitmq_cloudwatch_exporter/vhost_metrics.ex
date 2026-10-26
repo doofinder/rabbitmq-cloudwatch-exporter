@@ -40,6 +40,7 @@ defmodule RabbitMQCloudWatchExporter.VHostMetrics do
     Common.stats(vhost, Common.message_counts)
       ++ Common.stats(Keyword.get(vhost, :message_stats, []), Common.message_stats)
       ++ queue_count(vhost_name)
+      ++ queues_with_messages_ready(vhost_name)
       |> Enum.map(fn(m) -> m ++ [dimensions: dimensions] end)
   end
 
@@ -47,5 +48,15 @@ defmodule RabbitMQCloudWatchExporter.VHostMetrics do
     [[metric_name: "QueueCount",
       unit: "Count",
       value: RabbitQueue.count(vhost_name)]]
+  end
+
+  defp queues_with_messages_ready(vhost_name) do
+    value = vhost_name
+      |> RabbitQueue.info_all([:messages_ready])
+      |> Enum.count(fn(queue) -> Keyword.get(queue, :messages_ready, 0) > 0 end)
+
+    [[metric_name: "QueuesWithMessagesReady",
+      unit: "Count",
+      value: value]]
   end
 end
