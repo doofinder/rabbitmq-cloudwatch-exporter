@@ -46,6 +46,6 @@ defmodule RabbitMQCloudWatchExporter.VHostMetrics do
   defp queue_count(vhost_name) do
     [[metric_name: "QueueCount",
       unit: "Count",
-      value: vhost_name |> RabbitQueue.list() |> length()]]
+      value: RabbitQueue.count(vhost_name)]]
   end
 end
